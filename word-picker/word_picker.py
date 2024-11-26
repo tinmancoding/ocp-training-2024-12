@@ -7,4 +7,4 @@ options = ["first", "second", "third"]
 
 @app.route("/")
 def pick_word():
-    return choice(options)
+    return choice(options) + "\n"
