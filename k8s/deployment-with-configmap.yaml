@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: word-picker-options
+data:
+  custom_options.txt: |
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: word-picker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: word-picker
+      deployment: word-picker
+  template:
+    metadata:
+      labels:
+        app: word-picker
+        deployment: word-picker
+    spec:
+      containers:
+      - name: word-picker
+        image: tinmancoding/word-picker:v2.12
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: options-config-map
+          mountPath: /code/config
+        env:
+        - name: OPTIONS_FILE
+          value: /code/config/custom_options.txt
+      volumes:
+      - name: options-config-map
+        configMap:
+          name: word-picker-options
+
