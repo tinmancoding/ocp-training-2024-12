@@ -37,4 +37,17 @@ spec:
       - name: options-config-map
         configMap:
           name: word-picker-options
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: word-picker
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: word-picker
+    deployment: word-picker
