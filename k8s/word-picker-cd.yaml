@@ -1,0 +1,70 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: word-picker
+  labels:
+    app: word-picker
+spec:
+  source:
+    contextDir: "word-picker"
+    git:
+      uri: https://github.com/tinmancoding/ocp-training-2024-12.git
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.12
+  output:
+    to:
+      kind: ImageStreamTag
+      name: word-picker:latest
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: python
+  labels:
+    app: word-picker
+spec:
+  tags:
+  - name: "3.9"
+    from:
+      kind: DockerImage
+      name: python:3.9
+  - name: "3.12"
+    from:
+      kind: DockerImage
+      name: python:3.12
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: word-picker
+  labels:
+    app: word-picker
+spec: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: word-picker
+  labels:
+    app: word-picker
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"word-picker:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"word-picker\")].image"}]'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: word-picker
+      deployment: word-picker
+  template:
+    metadata:
+      labels:
+        app: word-picker
+        deployment: word-picker
+    spec:
+      containers:
+      - name: word-picker
+        image: image-registry.openshift-image-registry.svc:5000/landrasi-dev/word-picker:latest
