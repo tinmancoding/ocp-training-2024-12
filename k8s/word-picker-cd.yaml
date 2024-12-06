@@ -19,6 +19,14 @@ spec:
     to:
       kind: ImageStreamTag
       name: word-picker:latest
+  triggers:
+  - type: Generic
+    generic:
+      secret: abrakadabra
+  - type: GitHub
+    github:
+      secret: abrakadabra
+  - type: ConfigChange
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
