@@ -76,3 +76,18 @@ spec:
       containers:
       - name: word-picker
         image: image-registry.openshift-image-registry.svc:5000/landrasi-dev/word-picker:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: word-picker
+  labels:
+    app: word-picker
+spec:
+  type: ClusterIP
+  selector:
+    app: word-picker
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
