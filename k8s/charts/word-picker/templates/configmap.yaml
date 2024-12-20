@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "word-picker.fullname" . }}
+  labels:
+    {{- include "word-picker.labels" . | nindent 4 }}
+data:
+  custom_options.txt: {{ .Values.customOptions }}
+    
