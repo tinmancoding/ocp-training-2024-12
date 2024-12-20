@@ -1,0 +1,73 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: word-picker
+parameters:
+- name: APP_POSTFIX
+  description: "This postfix will be added to all resource name with a dash."
+  required: true
+- name: CUSTOM_OPTIONS
+  description: "A string containing words to choose from."
+  value: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+- name: REPLICA_COUNT
+  value: "3"
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: word-picker-options-${APP_POSTFIX}
+    labels:
+      generated-by: word-picker-template
+      app-postfix: ${APP_POSTFIX}
+  data:
+    custom_options.txt: ${CUSTOM_OPTIONS}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: word-picker-${APP_POSTFIX}
+    labels:
+      generated-by: word-picker-template
+      app-postfix: ${APP_POSTFIX}
+  spec:
+    replicas: ${{REPLICA_COUNT}}
+    selector:
+      matchLabels:
+        app: word-picker
+        app-postfix: ${APP_POSTFIX}
+    template:
+      metadata:
+        labels:
+          app: word-picker
+          app-postfix: ${APP_POSTFIX}
+      spec:
+        containers:
+        - name: word-picker
+          image: tinmancoding/word-picker:v2.12
+          ports:
+          - containerPort: 5000
+          volumeMounts:
+          - name: options-config-map
+            mountPath: /code/config
+          env:
+          - name: OPTIONS_FILE
+            value: /code/config/custom_options.txt
+        volumes:
+        - name: options-config-map
+          configMap:
+            name: word-picker-options-${APP_POSTFIX}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: word-picker-${APP_POSTFIX}
+    labels:
+      generated-by: word-picker-template
+      app-postfix: ${APP_POSTFIX}
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 5000
+      protocol: TCP
+      targetPort: 5000
+    selector:
+      app: word-picker
+      app-postfix: ${APP_POSTFIX}
